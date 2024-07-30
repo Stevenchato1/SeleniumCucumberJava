@@ -4,14 +4,14 @@ import java.util.List;
 
 import org.testng.Assert;
 
-import java.text.Normalizer;
 import java.util.Arrays;
-
+import java.util.stream.Collectors;
 import io.cucumber.java.en.*;
 import pages.PaginaCursos;
 import pages.PaginaFundamentosTesting;
 import pages.PaginaPlan;
 import pages.PaginaPrincipal;
+import java.nio.charset.StandardCharsets;
 
 public class FreeRangeSteps {
 
@@ -43,16 +43,22 @@ public class FreeRangeSteps {
 
   @Then("I validate dropDown")
   public void validateDropwn() {
-    List<String> listaObtenidaS;
     List<String> listaObtenida = paginaPlan.returnPlanDropDown();
-    List<String> listaEsperada = Arrays.asList("Academia: $16.99 / mes • 13 productos",
-    "Academia: $176 / año • 13 productos",
-    "Free: Gratis • 3 productos");    
-    listaObtenidaS = listaObtenida.stream()
-    .map(str -> str.replace("â€¢", "•"))
-    .toList();
+    List<String> listaEsperada = Arrays.asList(
+        "Academia: $16.99 / mes • 13 productos",
+        "Academia: $176 / año • 13 productos",
+        "Free: Gratis • 3 productos"
+    );
  
-  
-    //Assert.assertEquals(listaObtenidaS, listaEsperada);
-    }
+    List<String> listaObtenidaS = listaObtenida.stream()
+        .map(this::fixEncoding)
+        .toList();
+ 
+    Assert.assertEquals(listaObtenidaS, listaEsperada);
+  }
+
+  private String fixEncoding(String input) {
+    byte[] bytes = input.getBytes(StandardCharsets.ISO_8859_1);
+    return new String(bytes, StandardCharsets.UTF_8);
+}
 }
